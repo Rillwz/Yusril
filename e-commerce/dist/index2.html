@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>E-Shop Gallery | Keranjang Belanja & Edukasi Keamanan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            line-height: 1.5;
+            transition: background 0.2s;
+        }
+
+        /* navbar */
+        .navbar {
+            background: white;
+            backdrop-filter: blur(0px);
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.8rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #2563eb;
+        }
+
+        .cart-icon {
+            position: relative;
+            font-size: 1.4rem;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -12px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border-radius: 30px;
+            padding: 2px 6px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        /* container */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* produk grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.8rem;
+            margin-top: 1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #eef2ff;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -12px rgba(0,0,0,0.1);
+        }
+
+        .card-img {
+            background: #eef2ff;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+
+        .card-content {
+            padding: 1.2rem;
+        }
+
+        .product-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .product-price {
+            color: #2563eb;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            font-size: 1.2rem;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        /* keranjang sidebar */
+        .cart-sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 380px;
+            max-width: 90vw;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #e2e8f0;
+        }
+
+        .cart-sidebar.open {
+            transform: translateX(0);
+        }
+
+        .cart-header {
+            padding: 1.2rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .cart-total {
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0;
+            font-weight: 700;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            margin: 1rem;
+            cursor: pointer;
+        }
+
+        /* panel vulnerabilitas (hidden by default, tapi bisa diakses via url) */
+        .vuln-section {
+            margin-top: 3rem;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 1rem;
+            padding: 1.2rem;
+        }
+
+        .alert {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 0.8rem;
+            border-radius: 0.6rem;
+            margin-bottom: 1rem;
+        }
+
+        footer {
+            background: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .search-bar {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .search-bar input {
+            flex:1;
+            padding: 0.7rem;
+            border-radius: 2rem;
+            border: 1px solid #cbd5e1;
+        }
+        button.small {
+            background: #334155;
+            color: white;
+            padding: 0 1.5rem;
+            border-radius: 2rem;
+            border: none;
+        }
+        .profile-card, .ping-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+        code {
+            background: #1e293b;
+            color: #facc15;
+            padding: 0.2rem 0.4rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">🛍️ E-Shop<span style="color:#2563eb">Lab</span></div>
+    <div class="nav-links">
+        <a href="#" onclick="showHome()">🏠 Beranda</a>
+        <a href="#" onclick="showProfile()">👤 Profil (IDOR)</a>
+        <a href="#" onclick="showSearchPage()">🔍 Cari (XSS)</a>
+        <a href="#" onclick="showPingTool()">🛠️ Diagnostic (CMD inj)</a>
+        <a href="#" onclick="toggleCart()">🛒 Keranjang <span id="cartCountBadge" class="cart-count" style="position:relative; top:-2px; right:0; margin-left:5px;">0</span></a>
+        <a href="#" id="loginLink" onclick="showLoginModal()">🔐 Login</a>
+    </div>
+</nav>
+
+<main class="container" id="mainApp">
+    <!-- Halaman default: daftar produk -->
+    <div id="homePage">
+        <h1 style="font-size: 1.8rem;">✨ Koleksi Terbaru</h1>
+        <p style="margin-bottom: 1.5rem; color: #475569;">Belanja aman? Tidak juga — pelajari celah keamanan.</p>
+        <div class="products-grid" id="productList"></div>
+        <div class="vuln-section">
+            <strong>⚠️ Mode Edukasi Keamanan (Case 1-6 terintegrasi)</strong><br>
+            • <strong>Case 1 (Auth Bypass):</strong> Login dengan user/password: <code>admin/admin123</code> atau manipulasi cookie.<br>
+            • <strong>Case 2 (Reflected XSS):</strong> Gunakan pencarian dengan payload <code>&lt;img src=x onerror=alert(1)&gt;</code><br>
+            • <strong>Case 3 (IDOR):</strong> Buka Profil?user_id=2 untuk lihat data user lain.<br>
+            • <strong>Case 4 (SQLi):</strong> Di pencarian produk, masukkan <code>' OR '1'='1</code> untuk lihat semua produk.<br>
+            • <strong>Case 5 (Open Redirect):</strong> Klik link footer "Bantuan" atau parameter redirect di URL.<br>
+            • <strong>Case 6 (Command Inj):</strong> Fitur Diagnostic → masukkan <code>127.0.0.1; ls</code>
+        </div>
+    </div>
+
+    <!-- Halaman profil IDOR -->
+    <div id="profilePage" style="display:none;">
+        <h2>👤 Profil Pengguna (IDOR vulnerable)</h2>
+        <p>Ganti parameter <code>?user_id=1,2,3</code> untuk akses data orang lain</p>
+        <div class="profile-card" id="profileContent">Loading...</div>
+    </div>
+
+    <!-- Halaman pencarian (Reflected XSS + SQLi simulasi) -->
+    <div id="searchPage" style="display:none;">
+        <h2>🔎 Pencarian Produk (XSS & SQLi)</h2>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Cari produk... ex: Laptop, ' OR '1'='1 , <script>alert(1)</script>" autocomplete="off">
+            <button class="small" id="searchBtn">Cari</button>
+        </div>
+        <div id="searchResults" style="margin-top:1rem;"></div>
+        <div class="alert">
+            💡 <strong>Reflected XSS (Case2):</strong> Parameter <code>q</code> akan ditampilkan mentah. <br>
+            💡 <strong>SQL Injection (Case4):</strong> Simulasi query dinamis menggunakan <code>UNION</code> palsu.
+        </div>
+    </div>
+
+    <!-- Halaman diagnostic command injection case6 -->
+    <div id="pingPage" style="display:none;">
+        <h2>🖥️ Network Diagnostic Tool</h2>
+        <p>Ping / traceroute simulator (raw command injection)</p>
+        <div class="search-bar">
+            <input type="text" id="cmdTarget" placeholder="contoh: 127.0.0.1; whoami" value="127.0.0.1">
+            <button class="small" id="runCmdBtn">Jalankan Command</button>
+        </div>
+        <div id="cmdOutput" class="ping-card" style="font-family: monospace; white-space: pre-wrap;"></div>
+        <div class="alert">
+            🔥 <strong>Command Injection (Case6):</strong> Gunakan <code>127.0.0.1; cat /etc/passwd</code> atau <code>$(whoami)</code> untuk eksekusi perintah sistem simulasi.
+        </div>
+    </div>
+</main>
+
+<!-- Sidebar Keranjang -->
+<div id="cartSidebar" class="cart-sidebar">
+    <div class="cart-header">
+        <span>🛒 Keranjang Belanja</span>
+        <button onclick="toggleCart()" style="background:none; border:none; font-size:1.4rem; cursor:pointer;">✕</button>
+    </div>
+    <div id="cartItemsList" class="cart-items"></div>
+    <div class="cart-total" id="cartTotalPrice">Total: Rp 0</div>
+    <button class="whatsapp-btn" id="checkoutWhatsappBtn">💬 Kirim ke WhatsApp</button>
+    <button onclick="clearCart()" style="margin:0 1rem 1rem 1rem; background:#f1f5f9; border:none; padding:0.5rem; border-radius:2rem;">Kosongkan</button>
+</div>
+
+<!-- Modal Login (Case1: Hardcoded & cookie trust) -->
+<div id="loginModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1100;">
+    <div style="background:white; max-width:380px; width:90%; border-radius:2rem; padding:2rem;">
+        <h3>Login (Case1 — Hardcoded + Cookie Manipulation)</h3>
+        <input type="text" id="loginUser" placeholder="Username" style="width:100%; padding:0.7rem; margin:0.5rem 0; border-radius:1rem; border:1px solid #ccc;">
+        <input type="password" id="loginPass" placeholder="Password" style="width:100%; padding:0.7rem; margin:0.5rem 0; border-radius:1rem; border:1px solid #ccc;">
+        <button id="doLoginBtn" style="background:#2563eb; color:white; border:none; width:100%; padding:0.7rem; border-radius:2rem; margin-top:0.5rem;">Login</button>
+        <p style="margin-top:0.8rem; font-size:0.8rem;">Akun: admin/admin123 , user/user123. Bisa bypass dengan cookie "session=admin"</p>
+        <button onclick="closeLoginModal()" style="margin-top:1rem; background:#e2e8f0; width:100%; border:none; padding:0.5rem;">Tutup</button>
+    </div>
+</div>
+
+<footer>
+    <p>© 2025 E-ShopLab — Situs edukasi kerentanan web | <a href="#" id="redirectLink" style="color:#94a3b8;">📢 Bantuan & Panduan (Open Redirect Case5)</a> | 📞 +6281456143638</p>
+</footer>
+
+<script>
+    // ======================== DATA PRODUK ========================
+    const products = [
+        { id: 1, name: "Laptop UltraBook 14", price: 12500000, image: "💻" },
+        { id: 2, name: "Smartphone Pro Max", price: 9800000, image: "📱" },
+        { id: 3, name: "Wireless Headset", price: 750000, image: "🎧" },
+        { id: 4, name: "Mechanical Keyboard", price: 850000, image: "⌨️" },
+        { id: 5, name: "Gaming Mouse", price: 450000, image: "🖱️" },
+        { id: 6, name: "Smartwatch Fit", price: 2100000, image: "⌚" },
+        { id: 7, name: "Monitor 24 Inch", price: 2300000, image: "🖥️" },
+        { id: 8, name: "SSD 1TB", price: 1850000, image: "💾" }
+    ];
+
+    // Keranjang (localStorage)
+    let cart = [];
+    function loadCart() { const stored = localStorage.getItem("shop_cart"); if(stored) cart = JSON.parse(stored); else cart = []; updateCartUI(); }
+    function saveCart() { localStorage.setItem("shop_cart", JSON.stringify(cart)); updateCartUI(); }
+    function addToCart(product, qty=1) {
+        const existing = cart.find(item => item.id === product.id);
+        if(existing) existing.qty += qty;
+        else cart.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
+        saveCart();
+        showToast("✅ " + product.name + " ditambahkan");
+    }
+    function removeFromCart(id) { cart = cart.filter(item => item.id !== id); saveCart(); }
+    function updateQuantity(id, delta) {
+        const idx = cart.findIndex(i => i.id === id);
+        if(idx !== -1) { cart[idx].qty += delta; if(cart[idx].qty <= 0) cart.splice(idx,1); }
+        saveCart();
+    }
+    function clearCart() { cart = []; saveCart(); showToast("Keranjang dikosongkan"); toggleCart(false); }
+    function updateCartUI() {
+        const container = document.getElementById("cartItemsList");
+        if(!container) return;
+        let total = 0;
+        let html = "";
+        cart.forEach(item => {
+            total += item.price * item.qty;
+            html += `<div class="cart-item">
+                        <div><strong>${item.name}</strong><br>Rp ${item.price.toLocaleString()}</div>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <button onclick="updateQuantity(${item.id}, -1)">-</button>
+                            <span>${item.qty}</span>
+                            <button onclick="updateQuantity(${item.id}, 1)">+</button>
+                            <button onclick="removeFromCart(${item.id})" style="background:#fee; border:none; border-radius:20px;">🗑️</button>
+                        </div>
+                     </div>`;
+        });
+        container.innerHTML = html || "<p style='text-align:center'>Keranjang kosong</p>";
+        document.getElementById("cartTotalPrice").innerHTML = `Total: Rp ${total.toLocaleString()}`;
+        document.getElementById("cartCountBadge").innerText = cart.reduce((sum,i)=>sum+i.qty,0);
+    }
+
+    // Toast sederhana
+    function showToast(msg) {
+        let t = document.createElement("div");
+        t.innerText = msg;
+        t.style.position = "fixed"; t.style.bottom = "20px"; t.style.left = "20px"; t.style.background = "#0f172a"; t.style.color = "white"; t.style.padding = "10px 16px"; t.style.borderRadius = "30px"; t.style.zIndex = "1200";
+        document.body.appendChild(t);
+        setTimeout(()=>t.remove(), 2000);
+    }
+
+    // Render produk di homepage
+    function renderProducts() {
+        const grid = document.getElementById("productList");
+        if(!grid) return;
+        grid.innerHTML = products.map(p => `
+            <div class="card">
+                <div class="card-img">${p.image}</div>
+                <div class="card-content">
+                    <div class="product-title">${p.name}</div>
+                    <div class="product-price">Rp ${p.price.toLocaleString()}</div>
+                    <button class="btn-primary" onclick='addToCart(${JSON.stringify(p)})'>➕ Tambah</button>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    // ========== CASE 1 : Login Bypass via hardcoded + cookie trust ==========
+    let currentUser = null;
+    function checkCookieSession() {
+        let cookies = document.cookie.split(';');
+        let user = null;
+        cookies.forEach(c => { if(c.trim().startsWith("session_user=")) user = c.split('=')[1]; });
+        if(user) {
+            currentUser = user;
+            document.getElementById("loginLink").innerText = `👤 ${user}`;
+        } else {
+            currentUser = null;
+            document.getElementById("loginLink").innerText = "🔐 Login";
+        }
+    }
+    function doLogin(username, password) {
+        const validUsers = [{username:"admin",pass:"admin123"},{username:"user",pass:"user123"}];
+        const found = validUsers.find(u => u.username === username && u.pass === password);
+        if(found) {
+            document.cookie = `session_user=${username}; path=/`;
+            currentUser = username;
+            closeLoginModal();
+            checkCookieSession();
+            showToast(`Login sebagai ${username} (case1 bypass dengan cookie)`);
+            return true;
+        } else {
+            showToast("Login gagal, coba admin/admin123");
+            return false;
+        }
+    }
+    function showLoginModal() { document.getElementById("loginModal").style.display = "flex"; }
+    function closeLoginModal() { document.getElementById("loginModal").style.display = "none"; }
+    document.getElementById("doLoginBtn")?.addEventListener("click", ()=>{
+        const u = document.getElementById("loginUser").value;
+        const p = document.getElementById("loginPass").value;
+        doLogin(u,p);
+    });
+
+    // ========== CASE 3 IDOR ==========
+    const usersDB = {
+        1: { name:"Budi Santoso", email:"budi@mail.com", role:"USER", balance:"Rp 250.000", address:"Jl. Merdeka 10" },
+        2: { name:"Siti Aisyah", email:"siti@mail.com", role:"USER", balance:"Rp 1.200.000", address:"Jl. Sudirman 5" },
+        3: { name:"Admin Dika", email:"admin@eshop.com", role:"ADMIN", balance:"Rp 99.999.999", address:"Admin Panel", secret_key:"SK-ADMIN-1337" }
+    };
+    function showProfile() {
+        hideAllPages();
+        document.getElementById("profilePage").style.display = "block";
+        const params = new URLSearchParams(window.location.search);
+        let userId = params.get("user_id");
+        if(!userId) userId = "1";
+        const user = usersDB[userId];
+        if(user) {
+            document.getElementById("profileContent").innerHTML = `
+                <strong>Nama:</strong> ${user.name}<br>
+                <strong>Email:</strong> ${user.email}<br>
+                <strong>Role:</strong> ${user.role}<br>
+                <strong>Saldo:</strong> ${user.balance}<br>
+                <strong>Alamat:</strong> ${user.address}<br>
+                ${user.secret_key ? `<span style="color:#d97706">🔑 Secret Key: ${user.secret_key}</span>` : ""}
+                <hr><small>Vulnerability IDOR: ganti ?user_id=3 untuk lihat data admin</small>
+            `;
+        } else { document.getElementById("profileContent").innerHTML = "User tidak ditemukan"; }
+        history.pushState({}, "", `?user_id=${userId}`);
+    }
+
+    // ========== CASE 2 & 4 : Reflected XSS + SQLi (Simulated) ==========
+    function showSearchPage() {
+        hideAllPages();
+        document.getElementById("searchPage").style.display = "block";
+        const params = new URLSearchParams(window.location.search);
+        const q = params.get("q");
+        if(q) {
+            document.getElementById("searchInput").value = q;
+            performSearch(q);
+        } else {
+            document.getElementById("searchResults").innerHTML = "<p>🔍 Masukkan kata kunci atau payload XSS/SQLi</p>";
+        }
+    }
+    function performSearch(query) {
+        // Vulnerability: innerHTML langsung dari input -> Reflected XSS (case2)
+        const resDiv = document.getElementById("searchResults");
+        let html = `<div class="alert" style="background:#f1f5f9;"><strong>Anda mencari: </strong> ${query}</div>`; // XSS di sini
+        
+        // Simulasi SQL injection (case4) dengan menggabungkan query tanpa sanitasi ke pencarian data
+        let filtered = products.filter(p => p.name.toLowerCase().includes(query.toLowerCase()) || (query.includes("' OR '1'='1") ? true : false));
+        if(query.includes("' OR '1'='1") || query.toLowerCase().includes("union select")) {
+            html += `<div style="background:#fef9c3; padding:1rem; border-radius:1rem;"><strong>⚠️ SQL Injection DETECTED!</strong> Query: SELECT * FROM products WHERE name LIKE '%${query}%' → Menampilkan SEMUA DATA</div>`;
+            filtered = products;
+        }
+        if(query.includes("UNION SELECT")) {
+            html += `<div style="background:#fef9c3;"><strong>UNION INJECTION:</strong> data password palsu: admin@hash</div>`;
+        }
+        if(filtered.length === 0) html += `<p>Tidak ada produk untuk "${query}"</p>`;
+        else html += `<div class="products-grid" style="margin-top:1rem;">${filtered.map(p => `<div class="card"><div class="card-img">${p.image}</div><div class="card-content"><b>${p.name}</b><br>Rp ${p.price.toLocaleString()}</div></div>`).join("")}</div>`;
+        
+        resDiv.innerHTML = html;  // Reflected XSS
+        history.pushState({}, "", `?q=${encodeURIComponent(query)}`);
+    }
+    document.getElementById("searchBtn")?.addEventListener("click", ()=>{
+        const query = document.getElementById("searchInput").value;
+        performSearch(query);
+    });
+
+    // ========== CASE 6 Command Injection Simulation ==========
+    function showPingTool() {
+        hideAllPages();
+        document.getElementById("pingPage").style.display = "block";
+    }
+    function runCommand(target) {
+        // Simulasi command injection (case6)
+        let output = `> Executing: ping ${target}\n`;
+        let isInjected = /[;&|`$(){}]/.test(target);
+        output += `PING ${target.split(/[;|&`$]/)[0]} (127.0.0.1): 56 data bytes\n64 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.1ms\n`;
+        if(isInjected) {
+            output += `\n[!] COMMAND INJECTION TERDETEKSI! Perintah tambahan dieksekusi:\n`;
+            let injectedPart = target.split(/[;&|`]/).slice(1).join(" ");
+            if(injectedPart.includes("whoami")) output += `uid=33(www-data) gid=33(www-data)\n`;
+            if(injectedPart.includes("ls")) output += `total 48\ndrwxr-xr-x  index.html  style.css  config.php  secret.txt\n`;
+            if(injectedPart.includes("cat /etc/passwd")) output += `root:x:0:0:root:/root:/bin/bash\nwww-data:x:33:33:www-data:/var/www\n`;
+            if(injectedPart.includes("id")) output += `uid=33(www-data) groups=33(www-data)\n`;
+            output += `\n[!] SERVER RENTAN COMMAND INJECTION (CASE 6)`;
+        } else {
+            output += `\n--- normal ping selesai ---`;
+        }
+        document.getElementById("cmdOutput").innerHTML = output;
+    }
+    document.getElementById("runCmdBtn")?.addEventListener("click", ()=>{
+        const target = document.getElementById("cmdTarget").value;
+        runCommand(target);
+    });
+
+    // ========== CASE 5 Open Redirect ==========
+    function openRedirect(url) {
+        if(url && url !== "#") {
+            // tanpa validasi -> open redirect
+            window.location.href = url;
+        } else {
+            window.location.href = "https://evil-phishing-site.com?redirect=fake";
+        }
+    }
+    document.getElementById("redirectLink")?.addEventListener("click", (e)=>{
+        e.preventDefault();
+        // vulnerability open redirect
+        let maliciousUrl = "https://www.google.com"; // ganti dengan payload berbahaya
+        openRedirect(maliciousUrl);
+        showToast("Open Redirect: seharusnya redirect ke eksternal (simulasi)");
+        // untuk keamanan demo tidak redirect langsung, tapi alert
+        alert("[DEMO] Open Redirect ke " + maliciousUrl + " (diblokir demo, pada sistem asli akan redirect)");
+    });
+
+    // ========== Checkout WhatsApp (integrasi keranjang & nomor) ==========
+    document.getElementById("checkoutWhatsappBtn")?.addEventListener("click", ()=>{
+        if(cart.length === 0) { showToast("Keranjang kosong!"); return; }
+        let message = "🛍️ *Pesanan E-ShopLab*%0A";
+        let total = 0;
+        cart.forEach(item => {
+            message += `- ${item.name} x${item.qty} = Rp ${(item.price * item.qty).toLocaleString()}%0A`;
+            total += item.price * item.qty;
+        });
+        message += `%0A📦 *Total: Rp ${total.toLocaleString()}*%0A%0ATerima kasih, segera konfirmasi pembayaran.`;
+        const phone = "6281456143638";
+        const url = `https://api.whatsapp.com/send?phone=${phone}&text=${message}`;
+        window.open(url, "_blank");
+        showToast("Redirect ke WhatsApp...");
+    });
+
+    // Helper UI
+    function hideAllPages() {
+        document.getElementById("homePage").style.display = "none";
+        document.getElementById("profilePage").style.display = "none";
+        document.getElementById("searchPage").style.display = "none";
+        document.getElementById("pingPage").style.display = "none";
+    }
+    function showHome() { hideAllPages(); document.getElementById("homePage").style.display = "block"; history.pushState({}, "", "/"); }
+    function toggleCart() { document.getElementById("cartSidebar").classList.toggle("open"); }
+    window.toggleCart = toggleCart;
+    window.addToCart = addToCart;
+    window.removeFromCart = removeFromCart;
+    window.updateQuantity = updateQuantity;
+    window.clearCart = clearCart;
+    window.showProfile = showProfile;
+    window.showSearchPage = showSearchPage;
+    window.showPingTool = showPingTool;
+    window.showHome = showHome;
+    window.showLoginModal = showLoginModal;
+    window.closeLoginModal = closeLoginModal;
+
+    // Inisialisasi + check parameter URL (XSS, IDOR, Redirect)
+    function init() {
+        loadCart();
+        renderProducts();
+        checkCookieSession();
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has("q")) { showSearchPage(); performSearch(urlParams.get("q")); }
+        else if(urlParams.has("user_id")) { showProfile(); }
+        else if(urlParams.has("redirect")) { 
+            // Open redirect via URL param (case5)
+            let redir = urlParams.get("redirect");
+            if(redir) setTimeout(()=>{ openRedirect(redir); }, 100);
+        }
+        else { showHome(); }
+    }
+    init();
+</script>
+</body>
+</html>

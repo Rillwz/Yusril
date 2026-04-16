@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>NexShop — Belanja Modern</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #faf9f7;
+            color: #1c1917;
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 12% 25%, rgba(217, 119, 6, 0.05) 0%, transparent 55%),
+                radial-gradient(ellipse at 88% 75%, rgba(180, 83, 9, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 1px 1px, rgba(0,0,0,0.02) 1px, transparent 0);
+            background-size: 100% 100%, 100% 100%, 30px 30px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        ::selection {
+            background: rgba(217, 119, 6, 0.2);
+            color: #92400e;
+        }
+
+        ::-webkit-scrollbar { width: 7px; }
+        ::-webkit-scrollbar-track { background: #faf9f7; }
+        ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
+
+        /* ========== NAVBAR ========== */
+        .navbar {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid rgba(217, 119, 6, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            padding: 0.85rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #d97706 0%, #b45309 50%, #92400e 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #57534e;
+            font-weight: 500;
+            font-size: 0.87rem;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            padding: 0.4rem 0.85rem;
+            border-radius: 2rem;
+        }
+
+        .nav-links a:hover {
+            color: #b45309;
+            background: rgba(217, 119, 6, 0.07);
+        }
+
+        .cart-icon {
+            position: relative;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cart-count {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            font-size: 0.62rem;
+            font-weight: 700;
+            border-radius: 30px;
+            padding: 2px 7px;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+        }
+
+        /* ========== CONTAINER ========== */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ========== PRODUCTS GRID ========== */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 1.8rem;
+            margin: 2rem 0;
+        }
+
+        /* ========== CARD ========== */
+        .card {
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 6px 20px rgba(0,0,0,0.025);
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.04);
+            position: relative;
+            opacity: 0;
+            animation: cardReveal 0.55s ease forwards;
+        }
+        .card:nth-child(1) { animation-delay: .04s }
+        .card:nth-child(2) { animation-delay: .09s }
+        .card:nth-child(3) { animation-delay: .14s }
+        .card:nth-child(4) { animation-delay: .19s }
+        .card:nth-child(5) { animation-delay: .24s }
+        .card:nth-child(6) { animation-delay: .29s }
+        .card:nth-child(7) { animation-delay: .34s }
+        .card:nth-child(8) { animation-delay: .39s }
+
+        @keyframes cardReveal {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #d97706, #f59e0b, #d97706);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            z-index: 2;
+        }
+
+        .card:hover::before { opacity: 1; }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(217,119,6,0.08), 0 8px 16px rgba(0,0,0,0.04);
+            border-color: rgba(217,119,6,0.12);
+        }
+
+        /* ========== CARD IMAGE ========== */
+        .card-img {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s ease;
+        }
+        .card:hover .card-img { transform: scale(1.03); }
+
+        .card:nth-child(1) .card-img { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+        .card:nth-child(2) .card-img { background: linear-gradient(135deg, #fce7f3, #f9a8d4); }
+        .card:nth-child(3) .card-img { background: linear-gradient(135deg, #dbeafe, #93c5fd); }
+        .card:nth-child(4) .card-img { background: linear-gradient(135deg, #d1fae5, #6ee7b7); }
+        .card:nth-child(5) .card-img { background: linear-gradient(135deg, #ede9fe, #c4b5fd); }
+        .card:nth-child(6) .card-img { background: linear-gradient(135deg, #fce7f3, #f472b6); }
+        .card:nth-child(7) .card-img { background: linear-gradient(135deg, #e0f2fe, #7dd3fc); }
+        .card:nth-child(8) .card-img { background: linear-gradient(135deg, #fef9c3, #facc15); }
+
+        .card-img::after {
+            content: '';
+            position: absolute;
+            width: 140px; height: 140px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            top: -40px; right: -40px;
+            pointer-events: none;
+        }
+        .card-img::before {
+            content: '';
+            position: absolute;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            bottom: -20px; left: -20px;
+            pointer-events: none;
+        }
+
+        /* ========== CARD CONTENT ========== */
+        .card-content { padding: 1.3rem 1.4rem 1.5rem; }
+
+        .product-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #1c1917;
+            letter-spacing: -0.2px;
+        }
+
+        .product-price {
+            color: #b45309;
+            font-weight: 700;
+            margin: 0.5rem 0 1rem;
+            font-size: 1.2rem;
+            letter-spacing: -0.3px;
+        }
+
+        /* ========== BUTTONS ========== */
+        .btn-primary {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            color: white;
+            border: none;
+            padding: 0.72rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 14px rgba(217,119,6,0.22);
+            font-family: inherit;
+            font-size: 0.9rem;
+            letter-spacing: -0.2px;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #b45309, #92400e);
+            box-shadow: 0 8px 24px rgba(217,119,6,0.32);
+            transform: translateY(-2px);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(217,119,6,0.18);
+        }
+
+        /* ========== CART SIDEBAR ========== */
+        .cart-sidebar {
+            position: fixed;
+            right: 0; top: 0;
+            width: 400px; max-width: 92vw;
+            height: 100vh;
+            background: #fefefe;
+            box-shadow: -10px 0 50px rgba(0,0,0,0.07), -1px 0 0 rgba(217,119,6,0.08);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        .cart-sidebar.open { transform: translateX(0); }
+
+        .cart-header {
+            padding: 1.5rem 1.5rem 1.2rem;
+            border-bottom: 1px solid rgba(217,119,6,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #1c1917;
+        }
+        .cart-header button {
+            transition: all 0.2s;
+            border-radius: 50%;
+            width: 36px; height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none !important;
+            border: none;
+        }
+        .cart-header button:hover { background: rgba(0,0,0,0.05) !important; }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.8rem 1.5rem;
+        }
+        .cart-items::-webkit-scrollbar { width: 5px; }
+        .cart-items::-webkit-scrollbar-track { background: transparent; }
+        .cart-items::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 3px; }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            transition: background 0.2s;
+            border-radius: 0.75rem;
+        }
+        .cart-item:hover { background: rgba(217,119,6,0.03); }
+
+        .cart-total {
+            padding: 1.2rem 1.5rem;
+            border-top: 2px solid rgba(217,119,6,0.1);
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #1c1917;
+            letter-spacing: -0.3px;
+        }
+
+        .whatsapp-btn {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border: none;
+            padding: 0.85rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            margin: 0.5rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            font-size: 0.92rem;
+            box-shadow: 0 4px 14px rgba(37,211,102,0.28);
+        }
+        .whatsapp-btn:hover {
+            box-shadow: 0 8px 24px rgba(37,211,102,0.38);
+            transform: translateY(-2px);
+        }
+
+        /* ========== SEARCH ========== */
+        .search-bar {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 0.85rem 1.5rem;
+            border-radius: 3rem;
+            border: 2px solid #e7e5e4;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: white;
+            color: #1c1917;
+        }
+        .search-bar input::placeholder { color: #a8a29e; }
+        .search-bar input:focus {
+            outline: none;
+            border-color: #d97706;
+            box-shadow: 0 0 0 4px rgba(217,119,6,0.08);
+        }
+
+        .btn-outline {
+            background: #f5f5f4;
+            border: 2px solid #e7e5e4;
+            padding: 0 1.8rem;
+            border-radius: 3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: #57534e;
+        }
+        .btn-outline:hover {
+            border-color: #d97706;
+            color: #b45309;
+            background: rgba(217,119,6,0.04);
+        }
+
+        /* ========== PROFILE & PING CARDS ========== */
+        .profile-card, .ping-card {
+            background: white;
+            border-radius: 1.25rem;
+            padding: 2rem;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        }
+
+        .ping-card pre {
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+            white-space: pre-wrap;
+            background: linear-gradient(135deg, #1c1917, #292524);
+            color: #a8a29e;
+            padding: 1.2rem 1.5rem;
+            border-radius: 1rem;
+            font-size: 0.84rem;
+            line-height: 1.7;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* ========== FOOTER ========== */
+        footer {
+            background: linear-gradient(180deg, #1c1917, #0c0a09);
+            color: #78716c;
+            text-align: center;
+            padding: 2.5rem 2rem;
+            margin-top: 4rem;
+            font-size: 0.85rem;
+            position: relative;
+            z-index: 1;
+        }
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 10%; right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(217,119,6,0.3), transparent);
+        }
+        footer a {
+            color: #d97706;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        footer a:hover { color: #f59e0b; text-decoration: underline; }
+
+        /* ========== TOAST ========== */
+        .toast-msg {
+            position: fixed;
+            bottom: 24px; left: 24px;
+            background: linear-gradient(135deg, #1c1917, #292524);
+            color: #fafaf9;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            z-index: 1200;
+            animation: toastSlide 2.2s cubic-bezier(0.4,0,0.2,1) forwards;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.05);
+            border: 1px solid rgba(217,119,6,0.15);
+            font-weight: 500;
+        }
+        @keyframes toastSlide {
+            0%   { opacity: 0; transform: translateY(16px) scale(0.95); }
+            10%  { opacity: 1; transform: translateY(0) scale(1); }
+            75%  { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-8px) scale(0.95); visibility: hidden; }
+        }
+
+        /* ========== BADGE ========== */
+        .badge {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        /* ========== PAGE TITLE OVERRIDES ========== */
+        #homePage h1 {
+            font-size: 2.2rem !important;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #1c1917;
+        }
+        #homePage p {
+            color: #78716c !important;
+            font-size: 1rem;
+        }
+        #profilePage h2,
+        #searchPage h2,
+        #diagnosticPage h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: #1c1917;
+            margin-bottom: 0.5rem;
+        }
+        #diagnosticPage p {
+            color: #78716c;
+        }
+
+        /* ========== LOGIN MODAL OVERRIDES ========== */
+        #loginModal {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.35) !important;
+        }
+        #loginModal > div {
+            background: white !important;
+            max-width: 400px !important;
+            width: 92% !important;
+            border-radius: 1.5rem !important;
+            padding: 2.5rem !important;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.04) !important;
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        #loginModal h3 {
+            font-size: 1.3rem !important;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            margin-bottom: 1.2rem !important;
+        }
+        #loginModal input[type="text"],
+        #loginModal input[type="password"] {
+            width: 100% !important;
+            padding: 0.82rem 1.3rem !important;
+            margin-bottom: 0.8rem !important;
+            border-radius: 2rem !important;
+            border: 2px solid #e7e5e4 !important;
+            font-family: inherit !important;
+            font-size: 0.9rem !important;
+            transition: all 0.25s !important;
+            background: #fafaf9 !important;
+            color: #1c1917 !important;
+        }
+        #loginModal input[type="text"]:focus,
+        #loginModal input[type="password"]:focus {
+            outline: none !important;
+            border-color: #d97706 !important;
+            box-shadow: 0 0 0 4px rgba(217,119,6,0.08) !important;
+            background: white !important;
+        }
+        #loginModal button[style*="background:#0f172a"] {
+            background: linear-gradient(135deg, #d97706, #b45309) !important;
+            border-radius: 2rem !important;
+            font-family: inherit !important;
+            font-size: 0.95rem !important;
+            padding: 0.82rem !important;
+            transition: all 0.3s !important;
+            box-shadow: 0 4px 14px rgba(217,119,6,0.22) !important;
+            color: white !important;
+        }
+        #loginModal button[style*="background:#0f172a"]:hover {
+            box-shadow: 0 8px 24px rgba(217,119,6,0.32) !important;
+            transform: translateY(-1px) !important;
+        }
+        #loginModal button[style*="background:#e2e8f0"] {
+            background: #f5f5f4 !important;
+            border-radius: 2rem !important;
+            font-family: inherit !important;
+            transition: all 0.2s !important;
+            color: #57534e !important;
+            font-weight: 500 !important;
+        }
+        #loginModal button[style*="background:#e2e8f0"]:hover {
+            background: #e7e5e4 !important;
+        }
+
+        /* ========== CART MISC ========== */
+        .cart-items > div[style*="text-align:center"] {
+            color: #a8a29e;
+            padding: 2.5rem 1rem;
+        }
+        .cart-item button {
+            transition: all 0.2s;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #57534e;
+        }
+        .cart-item button:hover {
+            background: rgba(217,119,6,0.15) !important;
+            color: #b45309 !important;
+        }
+        .cart-sidebar > button:last-of-type {
+            background: #f5f5f4 !important;
+            color: #78716c !important;
+            font-family: inherit !important;
+            font-weight: 500 !important;
+            font-size: 0.85rem !important;
+            transition: all 0.2s !important;
+        }
+        .cart-sidebar > button:last-of-type:hover {
+            background: #fee2e2 !important;
+            color: #dc2626 !important;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 640px) {
+            .navbar { padding: 0.75rem 1.2rem; }
+            .nav-links { gap: 0; }
+            .nav-links a { padding: 0.35rem 0.55rem; font-size: 0.8rem; }
+            .container { padding: 1.5rem 1rem; }
+            #homePage h1 { font-size: 1.7rem !important; }
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 1.2rem;
+            }
+            .card-img { height: 170px; font-size: 3.4rem; }
+        }
+
+        @media (max-width: 380px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">✦ NEXSHOP</div>
+    <div class="nav-links">
+        <a onclick="showHome()">Beranda</a>
+        <a onclick="showProfile()">Profil</a>
+        <a onclick="showSearch()">Cari</a>
+        <a onclick="showDiagnostic()">Diagnostic</a>
+        <a onclick="toggleCart()" class="cart-icon">
+            🛒 <span id="cartCountBadge" class="cart-count">0</span>
+        </a>
+        <a id="authLink" onclick="showLoginModal()">Masuk</a>
+    </div>
+</nav>
+
+<main class="container" id="mainApp">
+    <!-- Halaman utama produk -->
+    <div id="homePage">
+        <div style="margin-bottom: 1rem;">
+            <h1 style="font-size: 1.9rem;">Koleksi Pilihan</h1>
+            <p style="color: #475569;">Gadget & aksesoris terbaru</p>
+        </div>
+        <div class="products-grid" id="productList"></div>
+    </div>
+
+    <!-- Halaman Profil (IDOR) -->
+    <div id="profilePage" style="display:none;">
+        <h2>Akun Saya</h2>
+        <div class="profile-card" id="profileContent">Memuat data...</div>
+        <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #6c757d;">*Ganti parameter ?user_id di URL untuk melihat profil lain</p>
+    </div>
+
+    <!-- Halaman Pencarian (XSS + SQLi) -->
+    <div id="searchPage" style="display:none;">
+        <h2>Cari Produk</h2>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Nama produk, atau ' OR '1'='1" autocomplete="off">
+            <button class="btn-outline" id="searchBtn">Cari</button>
+        </div>
+        <div id="searchResults" style="margin-top: 0.5rem;"></div>
+    </div>
+
+    <!-- Halaman Diagnostic (Command Injection) -->
+    <div id="diagnosticPage" style="display:none;">
+        <h2>Network Diagnostic</h2>
+        <p style="margin-bottom: 1rem;">Test koneksi ke host / IP</p>
+        <div class="search-bar">
+            <input type="text" id="cmdTarget" placeholder="contoh: 8.8.8.8" value="127.0.0.1">
+            <button class="btn-outline" id="runDiagBtn">Jalankan Ping</button>
+        </div>
+        <div class="ping-card">
+            <pre id="cmdOutput">$ ping 127.0.0.1<br>▶ menunggu perintah...</pre>
+        </div>
+    </div>
+</main>
+
+<!-- Sidebar Keranjang -->
+<div id="cartSidebar" class="cart-sidebar">
+    <div class="cart-header">
+        <span>🛍️ Keranjang Belanja</span>
+        <button onclick="toggleCart()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+    </div>
+    <div id="cartItemsList" class="cart-items"></div>
+    <div class="cart-total" id="cartTotalPrice">Total: Rp 0</div>
+    <button class="whatsapp-btn" id="checkoutWA">💬 Lanjut ke WhatsApp</button>
+    <button onclick="clearCart()" style="background:#f1f5f9; border:none; margin:0 1rem 1rem 1rem; padding:0.6rem; border-radius:3rem; cursor:pointer;">Kosongkan Keranjang</button>
+</div>
+
+<!-- Modal Login (hardcoded + cookie trust) -->
+<div id="loginModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1100; backdrop-filter:blur(2px);">
+    <div style="background:white; max-width:380px; width:90%; border-radius:2rem; padding:2rem;">
+        <h3 style="margin-bottom:1rem;">Masuk ke Akun</h3>
+        <input type="text" id="loginUsername" placeholder="Username" style="width:100%; padding:0.7rem; margin-bottom:1rem; border-radius:2rem; border:1px solid #ccc;">
+        <input type="password" id="loginPassword" placeholder="Password" style="width:100%; padding:0.7rem; margin-bottom:1.2rem; border-radius:2rem; border:1px solid #ccc;">
+        <button id="submitLoginBtn" style="background:#0f172a; color:white; width:100%; padding:0.7rem; border-radius:2rem; border:none; font-weight:bold;">Login</button>
+        <p style="margin-top:1rem; font-size:0.7rem; text-align:center;"></p>
+        <button onclick="closeLoginModal()" style="margin-top:1rem; background:#e2e8f0; width:100%; border:none; padding:0.5rem; border-radius:2rem;">Tutup</button>
+    </div>
+</div>
+
+<footer>
+    <p>© 2025 NexShop | <a href="#" id="redirectFooter">Bantuan & Pusat Bantuan</a> | 📞 Layanan: +6281456143638</p>
+</footer>
+
+<script>
+    // ========== DATA PRODUK ==========
+    const products = [
+        { id: 1, name: "MacBook Pro M3", price: 22500000, image: "💻" },
+        { id: 2, name: "iPhone 15 Pro", price: 16500000, image: "📱" },
+        { id: 3, name: "Sony WH-1000XM5", price: 4299000, image: "🎧" },
+        { id: 4, name: "Keychron K2", price: 1150000, image: "⌨️" },
+        { id: 5, name: "Logitech MX Master 3S", price: 1450000, image: "🖱️" },
+        { id: 6, name: "Apple Watch Series 9", price: 6799000, image: "⌚" },
+        { id: 7, name: "Dell UltraSharp 27", price: 5699000, image: "🖥️" },
+        { id: 8, name: "Samsung 990 Pro 1TB", price: 2199000, image: "💾" }
+    ];
+
+    // Keranjang (localStorage)
+    let cart = [];
+    function loadCart() { const raw = localStorage.getItem("nex_cart"); if(raw) cart = JSON.parse(raw); else cart = []; updateCartUI(); }
+    function saveCart() { localStorage.setItem("nex_cart", JSON.stringify(cart)); updateCartUI(); }
+    function addToCart(product, qty = 1) {
+        const exist = cart.find(i => i.id === product.id);
+        if(exist) exist.qty += qty;
+        else cart.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
+        saveCart();
+        toastMsg(`${product.name} ditambahkan`);
+    }
+    function removeFromCart(id) { cart = cart.filter(i => i.id !== id); saveCart(); }
+    function updateQty(id, delta) {
+        const idx = cart.findIndex(i => i.id === id);
+        if(idx !== -1) { cart[idx].qty += delta; if(cart[idx].qty <= 0) cart.splice(idx,1); }
+        saveCart();
+    }
+    function clearCart() { cart = []; saveCart(); toastMsg("Keranjang dikosongkan"); if(cartSidebar.classList.contains('open')) toggleCart(); }
+    function updateCartUI() {
+        const container = document.getElementById("cartItemsList");
+        if(!container) return;
+        let total = 0;
+        let html = '';
+        cart.forEach(item => {
+            total += item.price * item.qty;
+            html += `<div class="cart-item">
+                        <div><strong>${item.name}</strong><br>Rp ${item.price.toLocaleString()}</div>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <button onclick="updateQty(${item.id}, -1)" style="background:#eef2ff; border:none; width:28px; border-radius:30px;">-</button>
+                            <span>${item.qty}</span>
+                            <button onclick="updateQty(${item.id}, 1)" style="background:#eef2ff; border:none; width:28px; border-radius:30px;">+</button>
+                            <button onclick="removeFromCart(${item.id})" style="background:none; border:none;">🗑️</button>
+                        </div>
+                     </div>`;
+        });
+        container.innerHTML = html || "<div style='text-align:center; padding:1rem;'>Keranjang kosong</div>";
+        document.getElementById("cartTotalPrice").innerHTML = `Total: Rp ${total.toLocaleString()}`;
+        document.getElementById("cartCountBadge").innerText = cart.reduce((s,i)=>s+i.qty,0);
+    }
+
+    function toastMsg(msg) {
+        const div = document.createElement('div');
+        div.className = 'toast-msg';
+        div.innerText = msg;
+        document.body.appendChild(div);
+        setTimeout(()=>div.remove(), 2000);
+    }
+
+    // render produk
+    function renderProducts() {
+        const grid = document.getElementById("productList");
+        if(grid) grid.innerHTML = products.map(p => `
+            <div class="card">
+                <div class="card-img">${p.image}</div>
+                <div class="card-content">
+                    <div class="product-title">${p.name}</div>
+                    <div class="product-price">Rp ${p.price.toLocaleString()}</div>
+                    <button class="btn-primary" onclick='addToCart(${JSON.stringify(p)})'>Tambah ke Keranjang</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ========== CASE 1 : Hardcoded credentials + Cookie trust ==========
+    let loggedUser = null;
+    function updateAuthUI() {
+        const authLink = document.getElementById("authLink");
+        if(loggedUser) authLink.innerText = `👤 ${loggedUser}`;
+        else authLink.innerText = "Masuk";
+    }
+    function checkSessionCookie() {
+        const cookies = document.cookie.split(';');
+        let user = null;
+        for(let c of cookies) if(c.trim().startsWith("nex_session=")) user = c.split('=')[1];
+        if(user) { loggedUser = user; updateAuthUI(); return true; }
+        else { loggedUser = null; updateAuthUI(); return false; }
+    }
+    function doLogin(username, password) {
+        const valid = [{u:"admin",p:"admin123"},{u:"user",p:"user123"}];
+        const match = valid.find(v => v.u === username && v.p === password);
+        if(match) {
+            document.cookie = `nex_session=${username}; path=/`;
+            loggedUser = username;
+            updateAuthUI();
+            closeLoginModal();
+            toastMsg(`Selamat datang, ${username}`);
+            return true;
+        } else {
+            toastMsg("Login gagal, coba admin/admin123");
+            return false;
+        }
+    }
+    function showLoginModal() { document.getElementById("loginModal").style.display = "flex"; }
+    function closeLoginModal() { document.getElementById("loginModal").style.display = "none"; }
+    document.getElementById("submitLoginBtn")?.addEventListener("click", ()=>{
+        const u = document.getElementById("loginUsername").value;
+        const p = document.getElementById("loginPassword").value;
+        doLogin(u,p);
+    });
+
+    // ========== CASE 3 IDOR ==========
+    const userDatabase = {
+        1: { name: "Budi Pratama", email: "budi@nexshop.com", role: "Member", saldo: "Rp 250.000", alamat: "Jakarta Selatan" },
+        2: { name: "Citra Kirana", email: "citra@nexshop.com", role: "Gold Member", saldo: "Rp 1.450.000", alamat: "Surabaya" },
+        3: { name: "Admin Pusat", email: "admin@nexshop.com", role: "Administrator", saldo: "Rp 99.999.999", alamat: "Akses Privat", secret_key: "NEX-ADMIN-7f3a9b" }
+    };
+    function showProfile() {
+        hideAllPages();
+        document.getElementById("profilePage").style.display = "block";
+        const params = new URLSearchParams(window.location.search);
+        let uid = params.get("user_id") || "1";
+        const profile = userDatabase[uid];
+        const cont = document.getElementById("profileContent");
+        if(profile) {
+            cont.innerHTML = `
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:1rem;"><div style="background:#eef2ff; width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.6rem;">👤</div><div><h3>${profile.name}</h3><span class="badge">${profile.role}</span></div></div>
+                <p><strong>Email:</strong> ${profile.email}</p>
+                <p><strong>Saldo:</strong> ${profile.saldo}</p>
+                <p><strong>Alamat:</strong> ${profile.alamat}</p>
+                ${profile.secret_key ? `<p style="color:#b91c1c;"><strong>🔑 Kode Rahasia:</strong> ${profile.secret_key}</p>` : ''}
+                <hr style="margin:1rem 0"><small style="color:#6c757d;">ID profil: ${uid}</small>
+            `;
+        } else cont.innerHTML = "<p>Pengguna tidak ditemukan</p>";
+        history.pushState({}, "", `?user_id=${uid}`);
+    }
+
+    // ========== CASE 2 & 4 : Reflected XSS + SQL Injection (simulasi) ==========
+    function showSearch() {
+        hideAllPages();
+        document.getElementById("searchPage").style.display = "block";
+        const params = new URLSearchParams(location.search);
+        const q = params.get("q");
+        if(q) { document.getElementById("searchInput").value = q; performSearch(q); }
+        else document.getElementById("searchResults").innerHTML = "<p style='color:#6c757d'>Masukkan kata kunci produk</p>";
+    }
+    function performSearch(query) {
+        const resultDiv = document.getElementById("searchResults");
+        // VULNERABLE: innerHTML dengan raw input -> XSS (case2)
+        let html = `<div style="background:#f8fafc; padding:0.8rem; border-radius:1rem; margin-bottom:1rem;"><strong>Pencarian:</strong> ${query}</div>`;
+        
+        // Simulasi SQL Injection (case4)
+        let filtered = products.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
+        if(query.includes("' OR '1'='1") || query.toLowerCase().includes("union select")) {
+            html += `<div style="background:#fee2e2; padding:0.8rem; border-radius:1rem; margin-bottom:1rem;">⚠️ Query error: 1064 — Tampilkan semua data (SQLi bypass)</div>`;
+            filtered = products;
+        }
+        if(query.includes("UNION SELECT")) {
+            html += `<div style="background:#fff3cd; padding:0.5rem;">[!] Ekstraksi data: admin@email.com | pass_hash: 5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8</div>`;
+        }
+        if(filtered.length === 0) html += `<p>Tidak ada produk untuk "${query}"</p>`;
+        else {
+            html += `<div class="products-grid" style="margin-top:1rem;">${filtered.map(p => `<div class="card"><div class="card-img">${p.image}</div><div class="card-content"><b>${p.name}</b><br>Rp ${p.price.toLocaleString()}</div></div>`).join("")}</div>`;
+        }
+        resultDiv.innerHTML = html;
+        history.pushState({}, "", `?q=${encodeURIComponent(query)}`);
+    }
+    document.getElementById("searchBtn")?.addEventListener("click", ()=>{
+        const val = document.getElementById("searchInput").value;
+        performSearch(val);
+    });
+
+    // ========== CASE 6 : Command Injection ==========
+    function showDiagnostic() {
+        hideAllPages();
+        document.getElementById("diagnosticPage").style.display = "block";
+    }
+    function runDiagnostic(target) {
+        let output = `> ping ${target}\n`;
+        const isInjected = /[;&|`$(){}]/.test(target);
+        output += `PING ${target.split(/[;|&`$]/)[0]} (127.0.0.1): 56 data bytes\n64 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.042ms\n`;
+        if(isInjected) {
+            output += `\n[!] INJECTION DETECTED → perintah tambahan:\n`;
+            const injectPart = target.split(/[;&|`$]/).slice(1).join(" ");
+            if(injectPart.includes("whoami")) output += `uid=33(www-data) gid=33(www-data) groups=33(www-data)\n`;
+            if(injectPart.includes("ls")) output += `index.html  style.css  config.php  .env  secret.txt\n`;
+            if(injectPart.includes("cat /etc/passwd")) output += `root:x:0:0:root:/root:/bin/bash\nwww-data:x:33:33:www-data:/var/www/html\n`;
+            if(injectPart.includes("id")) output += `uid=33(www-data) gid=33(www-data) context=system_u:system_r:httpd_t\n`;
+            output += `\n⚠️ Eksekusi perintah sistem berhasil (RCE)`;
+        } else output += `\n--- ${target} ping statistics --- 0% packet loss`;
+        document.getElementById("cmdOutput").innerHTML = output;
+    }
+    document.getElementById("runDiagBtn")?.addEventListener("click", ()=>{
+        const target = document.getElementById("cmdTarget").value;
+        runDiagnostic(target);
+    });
+
+    // ========== CASE 5 Open Redirect ==========
+    function openRedirect(url) {
+        if(url && url !== "#") window.location.href = url;
+        else window.location.href = "https://evil-phish.xyz?steal=session";
+    }
+    document.getElementById("redirectFooter")?.addEventListener("click", (e)=>{
+        e.preventDefault();
+        // open redirect vulnerability
+        const malicious = "https://www.google.com"; // demo tidak redirect jahat, tapi ilustrasi
+        toastMsg("Open Redirect: akan diarahkan ke link eksternal (simulasi)");
+        alert("[DEMO] Redirect ke " + malicious + " (pada produksi bisa ke situs phishing)");
+        // openRedirect(malicious);
+    });
+
+    // ========== Checkout WhatsApp (nomor 081456143638) ==========
+    document.getElementById("checkoutWA")?.addEventListener("click", ()=>{
+        if(cart.length === 0) { toastMsg("Keranjang kosong!"); return; }
+        let msg = "🛍️ *Pesanan NexShop*%0A";
+        let total = 0;
+        cart.forEach(item => {
+            msg += `- ${item.name} x${item.qty} = Rp ${(item.price * item.qty).toLocaleString()}%0A`;
+            total += item.price * item.qty;
+        });
+        msg += `%0A📦 *Total: Rp ${total.toLocaleString()}*%0A%0ATerima kasih, segera konfirmasi.`;
+        const phone = "6281456143638";
+        const waUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${msg}`;
+        window.open(waUrl, "_blank");
+        toastMsg("Buka WhatsApp...");
+    });
+
+    // helper UI
+    function hideAllPages() {
+        document.getElementById("homePage").style.display = "none";
+        document.getElementById("profilePage").style.display = "none";
+        document.getElementById("searchPage").style.display = "none";
+        document.getElementById("diagnosticPage").style.display = "none";
+    }
+    function showHome() { hideAllPages(); document.getElementById("homePage").style.display = "block"; history.pushState({}, "", "/"); }
+    function toggleCart() { document.getElementById("cartSidebar").classList.toggle("open"); }
+
+    window.addToCart = addToCart;
+    window.removeFromCart = removeFromCart;
+    window.updateQty = updateQty;
+    window.clearCart = clearCart;
+    window.showProfile = showProfile;
+    window.showSearch = showSearch;
+    window.showDiagnostic = showDiagnostic;
+    window.showHome = showHome;
+    window.toggleCart = toggleCart;
+    window.showLoginModal = showLoginModal;
+    window.closeLoginModal = closeLoginModal;
+
+    // initial load
+    function init() {
+        loadCart();
+        renderProducts();
+        checkSessionCookie();
+        const urlParams = new URLSearchParams(location.search);
+        if(urlParams.has("q")) { showSearch(); performSearch(urlParams.get("q")); }
+        else if(urlParams.has("user_id")) { showProfile(); }
+        else if(urlParams.has("redirect")) { openRedirect(urlParams.get("redirect")); }
+        else showHome();
+    }
+    init();
+</script>
+</body>
+</html>
